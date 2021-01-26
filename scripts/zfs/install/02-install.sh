@@ -9,16 +9,16 @@ print () {
 # Sort mirrors
 print "Sort mirrors"
 pacman -Sy reflector --noconfirm
-reflector --country France --country Germany --latest 6 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+reflector --country Australia --latest 6 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 
 # Install
 print "Install Arch Linux"
-pacstrap /mnt base base-devel linux-lts linux-lts-headers linux-firmware intel-ucode efibootmgr vim git ansible connman wpa_supplicant
+pacstrap /mnt base base-devel linux linux-headers linux-firmware intel-ucode efibootmgr vim git ansible connman wpa_supplicant
 
 # Generate fstab excluding ZFS entries
 print "Generate fstab excluding ZFS entries"
 genfstab -U /mnt | grep -v "zroot" | tr -s '\n' | sed 's/\/mnt//'  > /mnt/etc/fstab
- 
+
 # Set hostname
 echo "Please enter hostname :"
 read hostname
@@ -34,9 +34,9 @@ EOF
 
 # Prepare locales and keymap
 print "Prepare locales and keymap"
-echo "KEYMAP=fr" > /mnt/etc/vconsole.conf
-sed -i 's/#\(fr_FR.UTF-8\)/\1/' /mnt/etc/locale.gen
-echo 'LANG="fr_FR.UTF-8"' > /mnt/etc/locale.conf
+echo "KEYMAP=us" > /mnt/etc/vconsole.conf
+sed -i 's/#\(en_US.UTF-8\)/\1/' /mnt/etc/locale.gen
+echo 'LANG="en_US.UTF-8"' > /mnt/etc/locale.conf
 
 # Prepare initramfs
 print "Prepare initramfs"
@@ -88,10 +88,10 @@ default org.zectl-default
 timeout 10
 EOSF
   cat > /efi/loader/entries/org.zectl-default.conf <<"EOSF"
-title           Arch Linux ZFS Default
-linux           /env/org.zectl-default/vmlinuz-linux-lts
+title           Arch Linux ZFS Mainline
+linux           /env/org.zectl-default/vmlinuz-linux
 initrd          /env/org.zectl-default/intel-ucode.img
-initrd          /env/org.zectl-default/initramfs-linux-lts.img
+initrd          /env/org.zectl-default/initramfs-linux.img
 options         zfs=zroot/ROOT/default rw
 EOSF
 
@@ -99,7 +99,7 @@ EOSF
   bootctl --path=/efi update
 
   # Create user
-  useradd -m user
+  useradd -m ghost
 
 EOF
 
@@ -109,13 +109,13 @@ arch-chroot /mnt /bin/passwd
 
 # Set user passwd
 print "Set user password"
-arch-chroot /mnt /bin/passwd user
+arch-chroot /mnt /bin/passwd ghost
 
 # Configure sudo
 print "Configure sudo"
 cat > /mnt/etc/sudoers <<"EOF"
 root ALL=(ALL) ALL
-user ALL=(ALL) ALL
+ghost ALL=(ALL) ALL
 Defaults rootpw
 EOF
 
